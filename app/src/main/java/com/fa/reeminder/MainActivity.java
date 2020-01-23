@@ -38,8 +38,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        items = new ArrayList<String>();
-        itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
+        items = new ArrayList<>();
+        showSP();
+
+        itemsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
         lvItem.setAdapter(itemsAdapter);
         lvItem.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -78,14 +80,54 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
+                int new_key = items.size();
+                String item= inputField.getText().toString();
 
-                items.add(inputField.getText().toString());
+                items.add(new_key,item);
+                addToSh(new_key, item);
+
                 itemsAdapter.notifyDataSetChanged();
             }
         });
         builder.setNegativeButton("Cancel", null);
 
         builder.create().show();
+    }
+    private void delSP(int position){
+        String key = String.valueOf(position);
+        SharedPreferences sh = getSharedPreferences("todo", MODE_PRIVATE);
+        sh.edit().remove(key);
+        //hapus 1 item. celah kosong
+    }
+
+    private void sortSP(){
+        SharedPreferences sp = getSharedPreferences("todo",MODE_PRIVATE);
+        SharedPreferences.Editor editor= sp.edit();
+        editor.clear();
+        editor.apply();
+        for(int i = 0; i < items.size();i++){
+            editor.putString(String.valueOf(i),items.get(i));
+        }
+        editor.apply();
+
+    }
+
+    private void showSP(){
+        SharedPreferences sh = getSharedPreferences("todo", MODE_PRIVATE);
+        if (sh.getAll().size() > 0){
+            for (int i=0 ; i< sh.getAll().size(); i++){
+                String key = String.valueOf(i);
+                items.add(sh.getString(key, null));
+            }
+        }
+    }
+
+    private void addToSh(int key, String item){
+        SharedPreferences sh = getSharedPreferences("todo", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sh.edit();
+        String k = String.valueOf(key);
+        editor.putString(k, item);
+        editor.apply();
     }
 
 
