@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> items;
     private ListView lvItem;
     private FloatingActionButton fab;
+    public EditText edtAdd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,14 +58,57 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 items.remove(which_item);
                                 itemsAdapter.notifyDataSetChanged();
+                                sortDel();
                             }
                         })
-                        .setNegativeButton("Ya", null)
+                        .setNegativeButton("Tidak", null)
                         .show();
                 return true;
             }
         });
+        lvItem.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                AlertDialog.Builder builder2 = new AlertDialog.Builder(MainActivity.this);
+                builder2.setMessage("Apakah Anda Yakin ?");
+                builder2.setTitle("Ingin Mengubahnya ?");
+                final EditText inputField2 = new EditText(MainActivity.this);
+                inputField2.setText(items.get(position));
+                builder2.setView(inputField2);
+                builder2.setPositiveButton("Edit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String value = inputField2.getText().toString();
+                        items.remove(position);
+                        items.add(position, value);
+                        sortDel();
+
+                        itemsAdapter.notifyDataSetChanged();
+
+                    }
+                });
+                builder2.setNegativeButton("Tidak",null);
+                builder2.show();
+            }
+        });
     }
+
+
+    public void sortDel(){
+        SharedPreferences sh = getSharedPreferences("todo",MODE_PRIVATE);
+        SharedPreferences.Editor editor= sh.edit();
+
+        editor.clear();
+        editor.apply();
+
+        for(int i=0; i < items.size(); i++){
+            editor.putString(String.valueOf(i), items.get(i));
+        }
+
+        editor.apply();
+
+    }
+
     public void initial() {
         fab = findViewById(R.id.btn_fab);
         lvItem = findViewById(R.id.Lv);
@@ -72,16 +116,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void addtask() {
+        View view = View.inflate(this,R.layout.edt_txt_alert, null);
+        edtAdd = view.findViewById(R.id.addTxt);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Ingin Menambah Catatan ? ");
         builder.setTitle("Add New");
-        final EditText inputField = new EditText(this);
-        builder.setView(inputField);
+        //final EditText inputField = new EditText(this);
+        builder.setView(view);
         builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
                 int new_key = items.size();
-                String item= inputField.getText().toString();
+                String item= edtAdd.getText().toString();
 
                 items.add(new_key,item);
                 addToSh(new_key, item);
@@ -101,8 +148,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sortSP(){
-        SharedPreferences sp = getSharedPreferences("todo",MODE_PRIVATE);
-        SharedPreferences.Editor editor= sp.edit();
+        SharedPreferences sh = getSharedPreferences("todo",MODE_PRIVATE);
+        SharedPreferences.Editor editor= sh.edit();
         editor.clear();
         editor.apply();
         for(int i = 0; i < items.size();i++){
