@@ -5,13 +5,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.icu.text.Transliterator;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -73,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
                 builder2.setMessage("Apakah Anda Yakin ?");
                 builder2.setTitle("Ingin Mengubahnya ?");
                 final EditText inputField2 = new EditText(MainActivity.this);
+                //final View inputfield3 = View.inflate(MainActivity.this,R.layout.edt_txt_alert, null);
+                //inputfield3.findViewById(R.id.addTxt);
                 inputField2.setText(items.get(position));
                 builder2.setView(inputField2);
                 builder2.setPositiveButton("Edit", new DialogInterface.OnClickListener() {
@@ -116,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void addtask() {
-        View view = View.inflate(this,R.layout.edt_txt_alert, null);
+        final View view = View.inflate(this,R.layout.edt_txt_alert, null);
         edtAdd = view.findViewById(R.id.addTxt);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -127,13 +132,21 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
-                int new_key = items.size();
-                String item= edtAdd.getText().toString();
+                int newKey = items.size();
+                String input = edtAdd.getText().toString();
+                boolean isEmptyInput = false;
 
-                items.add(new_key,item);
-                addToSh(new_key, item);
-
-                itemsAdapter.notifyDataSetChanged();
+                if (TextUtils.isEmpty(edtAdd.getText().toString())){
+                    isEmptyInput = true;
+                    edtAdd.setError("Reeminder Tidak Boleh Kosong");
+                    //Toast.makeText(getApplicationContext(),"Reeminder Tidak Boleh Kosong", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    items.add(newKey, input);
+                    addToSh(newKey, input);
+                    itemsAdapter.notifyDataSetChanged();
+                    Toast.makeText(getApplicationContext(),"Data telah di tambahkan", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         builder.setNegativeButton("Cancel", null);
